@@ -1,0 +1,11 @@
+# Copyright (c) 2026 HardenedLinux Animula
+# Author: Nala Ginrut <roy@hardenedlinux.org>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+board:
+  name: animula_alonzo
+  full_name: Animula Alonzo
+  vendor: animula
+  socs:
+    - name: stm32f411xe

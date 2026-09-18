@@ -1,0 +1,59 @@
+# Copyright (c) 2026 HardenedLinux Animula
+# Author: Nala Ginrut <roy@hardenedlinux.org>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+config BOARD_ANIMULA_ALONZO
+	select SOC_STM32F411XE
+	# The bootloader bit-bangs SWD on PA2/PA3 (USART2) and must re-apply
+	# USART2's pinctrl state to restore the BLE UART after programming.
+	select PINCTRL_NON_STATIC
+
+config ALONZO_BOOTLOADER_SIZE
+	hex "Reserved bootloader flash size (bytes)"
+	default 0x20000
+	help
+	  Flash size reserved for the Maker Bootloader. The application is
+	  linked immediately after it: APP_START = FLASH_BASE + this size.
+
+	  Must be sector-aligned on the STM32F411CEU6 (S0..S3 = 16 KB each,
+	  S4 = 64 KB, S5..S7 = 128 KB each). Valid values are:
+	    0x04000 (16 KB)   0x08000 (32 KB)   0x0C000 (48 KB)
+	    0x10000 (64 KB)   0x20000 (128 KB)  0x40000 (256 KB)
+	    0x60000 (384 KB)  0x80000 (512 KB)
+
+	  Keep this in sync with CONFIG_FLASH_LOAD_SIZE in the bootloader's
+	  prj.conf (and CONFIG_FLASH_LOAD_OFFSET in the application); a
+	  mismatch is caught by a build-time assertion in memory_layout.h.
+
+config ALONZO_FR8016_SWD_SELFTEST
+	bool "FR8016HA SWD self-test (Phase 1-4 bring-up)"
+	default n
+	help
+	  Replace the ble.bin update path with an SWD bring-up self-test: reset
+	  the FR8016HA SWD line, read its DPIDR, power up the debug domain, read
+	  the MEM-AP IDR, halt the Cortex-M3 core, read PC/SP/xPSR and run it
+	  again, then statically validate the generated FLM image. Intended only
+	  for hardware bring-up of the SWD master; keep disabled in production.
+
+config ALONZO_FR8016_RAM_BASE
+	hex "FR8016HA SRAM base for the FLM work area"
+	default 0x20000000
+	help
+	  Base of the FR8016HA SRAM window used to run the vendor .FLM flash
+	  algorithm (code + data + BKPT stub + one 256-byte page buffer + stack).
+	  The FLM is ROPI/RWPI so it runs at any RAM address; this just has to be
+	  real, writable FR8016HA SRAM.
+
+	  Per the FR801xH SDK User Guide: FR8016HA SRAM base = 0x20000000.
+
+config ALONZO_FR8016_RAM_SIZE
+	hex "FR8016HA SRAM size available for the FLM work area (bytes)"
+	default 0xC000
+	help
+	  Size of the FR8016HA SRAM window reserved for the FLM work area. Must be
+	  at least ~4 KB (the current FR8010H.FLM needs ~2.7 KB of code/data/BKPT
+	  plus a 512-byte stack and a 256-byte page buffer).
+
+	  Per the FR801xH SDK User Guide: FR8016HA SRAM size = 48 KB = 0xC000,
+	  range 0x20000000 .. 0x2000BFFF (0x2000C000 is the exclusive end).

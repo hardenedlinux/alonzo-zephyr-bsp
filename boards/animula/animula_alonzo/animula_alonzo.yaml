@@ -1,0 +1,19 @@
+# Copyright (c) 2026 HardenedLinux Animula
+# Author: Nala Ginrut <roy@hardenedlinux.org>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+identifier: animula_alonzo
+name: Animula Alonzo
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+vendor: animula
+supported:
+  - counter
+  - gpio
+  - i2c
+  - spi
+  - uart
